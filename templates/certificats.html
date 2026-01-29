@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+
+{% block title %}Certificats - Protocole SET/CDA{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-5 fw-bold text-white mb-3" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+            <i class="bi bi-award-fill"></i> Gestion des Certificats
+        </h1>
+        <p class="text-white lead" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">
+            Autorité de Certification - Certificats X.509
+        </p>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                <i class="bi bi-patch-check-fill text-white"></i>
+            </div>
+            <h6 class="text-muted text-uppercase small mb-2">Certificats Émis</h6>
+            <h2 class="fw-bold mb-0" id="stat-total-certs">0</h2>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+                <i class="bi bi-check-circle-fill text-white"></i>
+            </div>
+            <h6 class="text-muted text-uppercase small mb-2">Certificats Valides</h6>
+            <h2 class="fw-bold mb-0" id="stat-certs-valides">0</h2>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                <i class="bi bi-x-octagon-fill text-white"></i>
+            </div>
+            <h6 class="text-muted text-uppercase small mb-2">Certificats Révoqués</h6>
+            <h2 class="fw-bold mb-0" id="stat-certs-revoques">0</h2>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-person-plus-fill"></i>
+                Nouveau Client
+            </div>
+            <div class="card-body">
+                <form id="nouveau-client-form">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nom du Client</label>
+                        <input type="text" class="form-control" id="nom-client" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Numéro de Carte</label>
+                        <input type="text" class="form-control" id="carte-client" 
+                               placeholder="4970-XXXX-XXXX-XXXX" pattern="\d{4}-\d{4}-\d{4}-\d{4}" required>
+                        <small class="text-muted">Format: 4970-1234-5678-9012</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Solde Initial (€)</label>
+                        <input type="number" class="form-control" id="solde-initial-client" 
+                               min="0" step="0.01" value="1000" required>
+                        <small class="text-muted">Solde initial du compte (défaut: 1000€)</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Créer Client & Certificat
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <i class="bi bi-info-circle-fill"></i>
+                Informations CA
+            </div>
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">Autorité de Certification SET</h6>
+                <p class="small text-muted mb-2">
+                    <strong>Algorithme:</strong> RSA 2048 bits
+                </p>
+                <p class="small text-muted mb-2">
+                    <strong>Signature:</strong> SHA-256 with RSA
+                </p>
+                <p class="small text-muted mb-2">
+                    <strong>Validité par défaut:</strong> 365 jours
+                </p>
+                <p class="small text-muted mb-0">
+                    <strong>Format:</strong> X.509
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-list-ul"></i>
+                Liste des Certificats
+                <span class="badge bg-light text-dark ms-2" id="certs-badge">0</span>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Sujet</th>
+                                <th>N° Série</th>
+                                <th>Émetteur</th>
+                                <th>Expiration</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="certs-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="certModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-file-earmark-text me-2"></i>
+                    Détails du Certificat
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="cert-details"></div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const certModal = new bootstrap.Modal(document.getElementById('certModal'));
+
+    function loadCertificats() {
+        fetch('/api/certificats')
+            .then(response => response.json())
+            .then(certs => {
+                const tbody = document.getElementById('certs-tbody');
+                
+                document.getElementById('stat-total-certs').textContent = certs.length;
+                document.getElementById('certs-badge').textContent = certs.length;
+                
+                const valides = certs.filter(c => c.valide && !c.revoque).length;
+                const revoques = certs.filter(c => c.revoque).length;
+                
+                document.getElementById('stat-certs-valides').textContent = valides;
+                document.getElementById('stat-certs-revoques').textContent = revoques;
+                
+                tbody.innerHTML = '';
+                
+                certs.forEach(cert => {
+                    const expiration = new Date(cert.date_expiration);
+                    const isExpired = expiration < new Date();
+                    
+                    let statusBadge = '';
+                    if (cert.revoque) {
+                        statusBadge = '<span class="badge bg-danger"><i class="bi bi-x-circle-fill"></i> Révoqué</span>';
+                    } else if (isExpired) {
+                        statusBadge = '<span class="badge bg-warning"><i class="bi bi-exclamation-triangle-fill"></i> Expiré</span>';
+                    } else if (cert.valide) {
+                        statusBadge = '<span class="badge bg-success"><i class="bi bi-check-circle-fill"></i> Valide</span>';
+                    } else {
+                        statusBadge = '<span class="badge bg-secondary">Invalide</span>';
+                    }
+                    
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><strong>${cert.sujet}</strong></td>
+                        <td><code class="small">${cert.numero_serie.substring(0, 13)}...</code></td>
+                        <td>${cert.emetteur}</td>
+                        <td class="small">${expiration.toLocaleDateString('fr-FR')}</td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary me-1" onclick="viewCert('${cert.numero_serie}')">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            ${!cert.revoque ? `
+                            <button class="btn btn-sm btn-outline-danger" onclick="revokeCert('${cert.numero_serie}')">
+                                <i class="bi bi-x-circle"></i>
+                            </button>
+                            ` : ''}
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+    }
+
+    window.viewCert = function(numeroSerie) {
+        fetch('/api/certificats')
+            .then(response => response.json())
+            .then(certs => {
+                const cert = certs.find(c => c.numero_serie === numeroSerie);
+                if (!cert) return;
+                
+                const details = `
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="small text-muted">Sujet</label>
+                            <p class="fw-bold">${cert.sujet}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="small text-muted">Émetteur</label>
+                            <p class="fw-bold">${cert.emetteur}</p>
+                        </div>
+                        <div class="col-12">
+                            <label class="small text-muted">Numéro de Série</label>
+                            <p><code>${cert.numero_serie}</code></p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="small text-muted">Date de Création</label>
+                            <p>${new Date(cert.date_creation).toLocaleString('fr-FR')}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="small text-muted">Date d'Expiration</label>
+                            <p>${new Date(cert.date_expiration).toLocaleString('fr-FR')}</p>
+                        </div>
+                        <div class="col-12">
+                            <label class="small text-muted">Statut</label>
+                            <p>${cert.revoque ? 
+                                '<span class="badge bg-danger">Révoqué</span>' : 
+                                cert.valide ? 
+                                '<span class="badge bg-success">Valide</span>' : 
+                                '<span class="badge bg-warning">Invalide</span>'
+                            }</p>
+                        </div>
+                        <div class="col-12">
+                            <label class="small text-muted">Raison du Statut</label>
+                            <p>${cert.raison}</p>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('cert-details').innerHTML = details;
+                certModal.show();
+            });
+    };
+
+    window.revokeCert = function(numeroSerie) {
+        if (!confirm('Êtes-vous sûr de vouloir révoquer ce certificat ?')) return;
+        
+        fetch('/api/revoquer_certificat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ numero_serie: numeroSerie })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('✅ Certificat révoqué avec succès', 'success');
+                loadCertificats();
+            } else {
+                showToast('❌ Erreur : ' + data.message, 'danger');
+            }
+        });
+    };
+
+    document.getElementById('nouveau-client-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const nom = document.getElementById('nom-client').value;
+        const carte = document.getElementById('carte-client').value;
+        const solde_initial = parseFloat(document.getElementById('solde-initial-client').value);
+        
+        fetch('/api/nouveau_client', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ nom, carte, solde_initial })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('✅ ' + data.message, 'success');
+                document.getElementById('nouveau-client-form').reset();
+                loadCertificats();
+            } else {
+                showToast('❌ Erreur : ' + data.message, 'danger');
+            }
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadCertificats();
+    });
+
+    socket.on('nouveau_log', function(log) {
+        if (log.type === 'system' || log.type === 'security') {
+            loadCertificats();
+        }
+    });
+</script>
+{% endblock %}

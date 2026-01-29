@@ -1,0 +1,354 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Protocole SET/CDA{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-5 fw-bold text-white mb-3" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+            <i class="bi bi-speedometer2"></i> Tableau de Bord
+        </h1>
+        <p class="text-white lead" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">
+            Vue d'ensemble du système SET/CDA en temps réel
+        </p>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                <i class="bi bi-award-fill text-white"></i>
+            </div>
+            <h6 class="text-muted text-uppercase small mb-2">Certificats Actifs</h6>
+            <h2 class="fw-bold mb-0" id="stat-certificats-actifs">{{ stats.certificats_actifs }}</h2>
+            <small class="text-muted">/ {{ stats.total_certificats }} total</small>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                <i class="bi bi-receipt text-white"></i>
+            </div>
+            <h6 class="text-muted text-uppercase small mb-2">Transactions</h6>
+            <h2 class="fw-bold mb-0" id="stat-transactions">{{ stats.total_transactions }}</h2>
+            <small class="text-success">
+                <i class="bi bi-check-circle-fill"></i> {{ stats.transactions_reussies }} réussies
+            </small>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                <i class="bi bi-currency-euro text-white"></i>
+            </div>
+            <h6 class="text-muted text-uppercase small mb-2">Volume Total</h6>
+            <h2 class="fw-bold mb-0" id="stat-montant">{{ "%.2f"|format(stats.montant_total) }}€</h2>
+            <small class="text-muted">Transactions traitées</small>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+                <i class="bi bi-people-fill text-white"></i>
+            </div>
+            <h6 class="text-muted text-uppercase small mb-2">Entités</h6>
+            <h2 class="fw-bold mb-0" id="stat-entites">{{ stats.total_clients + stats.total_marchands }}</h2>
+            <small class="text-muted">{{ stats.total_clients }} clients, {{ stats.total_marchands }} marchands</small>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-graph-up"></i>
+                Activité des Transactions
+            </div>
+            <div class="card-body">
+                <canvas id="transactionsChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-pie-chart-fill"></i>
+                Répartition par Marchand
+            </div>
+            <div class="card-body">
+                <canvas id="marchandsChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-credit-card-fill"></i>
+                Soldes des Comptes
+            </div>
+            <div class="card-body">
+                <div id="soldes-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-activity"></i>
+                Logs Système (Temps Réel)
+                <span class="badge bg-success pulse ms-2">
+                    <i class="bi bi-broadcast"></i> Live
+                </span>
+            </div>
+            <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                <div id="logs-container"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-table"></i>
+                Dernières Transactions
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="transactions-table">
+                        <thead>
+                            <tr>
+                                <th>ID Transaction</th>
+                                <th>Carte</th>
+                                <th>Montant</th>
+                                <th>Date</th>
+                                <th>ARQC</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let transactionsChart = null;
+    let marchandsChart = null;
+
+    function loadStats() {
+        fetch('/api/stats')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('stat-certificats-actifs').textContent = data.certificats.actifs;
+                document.getElementById('stat-transactions').textContent = data.transactions.total;
+                document.getElementById('stat-montant').textContent = data.transactions.montant_total.toFixed(2) + '€';
+                document.getElementById('stat-entites').textContent = data.clients.total + data.marchands.total;
+            });
+    }
+
+    function loadTransactions() {
+        fetch('/api/transactions')
+            .then(response => response.json())
+            .then(transactions => {
+                const tbody = document.querySelector('#transactions-table tbody');
+                tbody.innerHTML = '';
+                
+                transactions.slice(-10).reverse().forEach(trans => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><code class="small">${trans.id.substring(0, 13)}...</code></td>
+                        <td><span class="badge bg-secondary">${trans.carte_masquee}</span></td>
+                        <td><strong>${trans.montant}€</strong></td>
+                        <td class="small">${new Date(trans.timestamp).toLocaleString('fr-FR')}</td>
+                        <td><code class="small">${trans.arqc.substring(0, 16)}...</code></td>
+                        <td><span class="badge bg-success">
+                            <i class="bi bi-check-circle-fill"></i> ${trans.statut}
+                        </span></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                
+                updateTransactionsChart(transactions);
+            });
+    }
+
+    function loadSoldes() {
+        fetch('/api/soldes')
+            .then(response => response.json())
+            .then(soldes => {
+                const container = document.getElementById('soldes-container');
+                container.innerHTML = '';
+                
+                for (const [nom, info] of Object.entries(soldes)) {
+                    const soldeHtml = `
+                        <div class="d-flex justify-content-between align-items-center mb-3 p-3 rounded" 
+                             style="background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.1));">
+                            <div>
+                                <h6 class="mb-1 fw-bold">${nom}</h6>
+                                <small class="text-muted">${info.carte_masquee}</small>
+                            </div>
+                            <h4 class="mb-0 fw-bold text-primary">${info.solde}€</h4>
+                        </div>
+                    `;
+                    container.innerHTML += soldeHtml;
+                }
+            });
+    }
+
+    function loadLogs() {
+        fetch('/api/logs')
+            .then(response => response.json())
+            .then(logs => {
+                const container = document.getElementById('logs-container');
+                container.innerHTML = '';
+                
+                logs.slice(-15).reverse().forEach(log => {
+                    const logHtml = `
+                        <div class="log-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <span class="badge bg-${log.type === 'error' ? 'danger' : log.type === 'security' ? 'warning' : 'info'} me-2">
+                                            ${log.type}
+                                        </span>
+                                        <strong>${log.actor}</strong>
+                                    </div>
+                                    <p class="mb-0 small">${log.message}</p>
+                                </div>
+                                <small class="text-muted">${new Date(log.timestamp).toLocaleTimeString('fr-FR')}</small>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += logHtml;
+                });
+            });
+    }
+
+    function updateTransactionsChart(transactions) {
+        const ctx = document.getElementById('transactionsChart');
+        
+        const dates = {};
+        transactions.forEach(trans => {
+            const date = new Date(trans.timestamp).toLocaleDateString('fr-FR');
+            dates[date] = (dates[date] || 0) + trans.montant;
+        });
+        
+        const labels = Object.keys(dates).slice(-7);
+        const data = labels.map(label => dates[label]);
+        
+        if (transactionsChart) {
+            transactionsChart.destroy();
+        }
+        
+        transactionsChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Volume (€)',
+                    data: data,
+                    borderColor: 'rgb(99, 102, 241)',
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    function loadMarchandsChart() {
+        fetch('/api/stats')
+            .then(response => response.json())
+            .then(data => {
+                const ctx = document.getElementById('marchandsChart');
+                
+                const promises = data.marchands.liste.map(m => 
+                    fetch(`/api/commandes/${m}`).then(r => r.json())
+                );
+                
+                Promise.all(promises).then(results => {
+                    const labels = data.marchands.liste;
+                    const counts = results.map(r => r.length);
+                    
+                    if (marchandsChart) {
+                        marchandsChart.destroy();
+                    }
+                    
+                    marchandsChart = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                data: counts,
+                                backgroundColor: [
+                                    'rgba(99, 102, 241, 0.8)',
+                                    'rgba(139, 92, 246, 0.8)',
+                                    'rgba(249, 115, 22, 0.8)'
+                                ]
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom'
+                                }
+                            }
+                        }
+                    });
+                });
+            });
+    }
+
+    socket.on('nouveau_log', function(log) {
+        loadStats();
+        loadTransactions();
+        loadSoldes();
+        loadLogs();
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadStats();
+        loadTransactions();
+        loadSoldes();
+        loadLogs();
+        loadMarchandsChart();
+        
+        setInterval(() => {
+            loadStats();
+            loadTransactions();
+            loadSoldes();
+        }, 5000);
+    });
+</script>
+{% endblock %}

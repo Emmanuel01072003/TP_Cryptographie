@@ -1,0 +1,346 @@
+{% extends "base.html" %}
+
+{% block title %}Interface Banque - Protocole SET/CDA{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-5 fw-bold text-white mb-3" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+            <i class="bi bi-bank"></i> Interface Banque Centrale
+        </h1>
+        <p class="text-white lead" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">
+            Gestion des autorisations de paiement et comptes
+        </p>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                <i class="bi bi-receipt-cutoff text-white"></i>
+            </div>
+            <h6 class="text-muted text-uppercase small mb-2">Transactions Traitées</h6>
+            <h2 class="fw-bold mb-0" id="stat-trans-total">0</h2>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+                <i class="bi bi-check-circle-fill text-white"></i>
+            </div>
+            <h6 class="text-muted text-uppercase small mb-2">Autorisations Accordées</h6>
+            <h2 class="fw-bold mb-0" id="stat-trans-approuvees">0</h2>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                <i class="bi bi-x-circle-fill text-white"></i>
+            </div>
+            <h6 class="text-muted text-uppercase small mb-2">Refusées</h6>
+            <h2 class="fw-bold mb-0" id="stat-trans-refusees">0</h2>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                <i class="bi bi-currency-euro text-white"></i>
+            </div>
+            <h6 class="text-muted text-uppercase small mb-2">Volume Total</h6>
+            <h2 class="fw-bold mb-0" id="stat-volume">0€</h2>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-wallet-fill"></i>
+                Comptes Clients
+            </div>
+            <div class="card-body">
+                <div id="comptes-container"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-shield-lock-fill"></i>
+                Sécurité
+            </div>
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">Mesures de Sécurité Actives</h6>
+                <div class="list-group">
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">
+                                <i class="bi bi-shield-check text-success me-2"></i>
+                                Chiffrement RSA
+                            </h6>
+                            <span class="badge bg-success">Actif</span>
+                        </div>
+                        <p class="mb-0 small text-muted">Clés 2048 bits pour le chiffrement des données</p>
+                    </div>
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">
+                                <i class="bi bi-arrow-repeat text-success me-2"></i>
+                                Protection Anti-Rejeu
+                            </h6>
+                            <span class="badge bg-success">Actif</span>
+                        </div>
+                        <p class="mb-0 small text-muted">Détection des transactions dupliquées</p>
+                    </div>
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">
+                                <i class="bi bi-clock-history text-success me-2"></i>
+                                Validation Temporelle
+                            </h6>
+                            <span class="badge bg-success">Actif</span>
+                        </div>
+                        <p class="mb-0 small text-muted">Fenêtre de validité de 5 minutes</p>
+                    </div>
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">
+                                <i class="bi bi-key-fill text-success me-2"></i>
+                                Génération ARQC
+                            </h6>
+                            <span class="badge bg-success">Actif</span>
+                        </div>
+                        <p class="mb-0 small text-muted">Cryptogramme unique par transaction</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <i class="bi bi-shield-exclamation me-2"></i>
+                Alertes de Sécurité (Tentatives d'Attaque Détectées)
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date/Heure</th>
+                                <th>Type d'Attaque</th>
+                                <th>Description</th>
+                                <th>Statut</th>
+                                <th>Sévérité</th>
+                            </tr>
+                        </thead>
+                        <tbody id="security-logs-tbody"></tbody>
+                    </table>
+                </div>
+                <div id="no-security-logs" class="text-center text-muted py-5">
+                    <i class="bi bi-shield-check display-1 text-success"></i>
+                    <p class="mt-3">Aucune tentative d'attaque détectée</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-table"></i>
+                Historique des Transactions
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID Transaction</th>
+                                <th>Carte</th>
+                                <th>Montant</th>
+                                <th>Date</th>
+                                <th>ARQC</th>
+                                <th>Statut</th>
+                                <th>Raison</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactions-tbody"></tbody>
+                    </table>
+                </div>
+                <div id="no-transactions" class="text-center text-muted py-5" style="display: none;">
+                    <i class="bi bi-inbox display-1"></i>
+                    <p class="mt-3">Aucune transaction pour le moment</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function loadBanqueData() {
+        fetch('/api/transactions')
+            .then(response => response.json())
+            .then(transactions => {
+                const tbody = document.getElementById('transactions-tbody');
+                const noTrans = document.getElementById('no-transactions');
+                
+                document.getElementById('stat-trans-total').textContent = transactions.length;
+                
+                const approuvees = transactions.filter(t => t.statut === 'approuvé').length;
+                const refusees = transactions.filter(t => t.statut === 'refusé').length;
+                document.getElementById('stat-trans-approuvees').textContent = approuvees;
+                document.getElementById('stat-trans-refusees').textContent = refusees;
+                
+                // Volume total seulement des transactions approuvées
+                const volume = transactions
+                    .filter(t => t.statut === 'approuvé')
+                    .reduce((sum, t) => sum + t.montant, 0);
+                document.getElementById('stat-volume').textContent = volume.toFixed(2) + '€';
+                
+                if (transactions.length === 0) {
+                    tbody.innerHTML = '';
+                    noTrans.style.display = 'block';
+                    return;
+                }
+                
+                noTrans.style.display = 'none';
+                tbody.innerHTML = '';
+                
+                transactions.slice().reverse().forEach(trans => {
+                    const tr = document.createElement('tr');
+                    const isRefused = trans.statut === 'refusé';
+                    const badgeClass = isRefused ? 'bg-danger' : 'bg-success';
+                    const badgeIcon = isRefused ? 'x-circle-fill' : 'check-circle-fill';
+                    
+                    tr.innerHTML = `
+                        <td><code class="small">${trans.id.substring(0, 13)}...</code></td>
+                        <td><span class="badge bg-secondary">${trans.carte_masquee || trans.carte}</span></td>
+                        <td><strong class="${isRefused ? 'text-danger' : 'text-primary'}">${trans.montant}€</strong></td>
+                        <td class="small">${new Date(trans.timestamp).toLocaleString('fr-FR')}</td>
+                        <td>${trans.arqc === 'N/A' ? '<span class="text-muted">N/A</span>' : '<code class="small">' + trans.arqc.substring(0, 16) + '...</code>'}</td>
+                        <td><span class="badge ${badgeClass}">
+                            <i class="bi bi-${badgeIcon}"></i> ${trans.statut}
+                        </span></td>
+                        <td class="small ${isRefused ? 'text-danger' : 'text-success'}">${trans.raison || trans.statut}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+        
+        fetch('/api/soldes')
+            .then(response => response.json())
+            .then(soldes => {
+                const container = document.getElementById('comptes-container');
+                container.innerHTML = '';
+                
+                for (const [nom, info] of Object.entries(soldes)) {
+                    const compteHtml = `
+                        <div class="d-flex justify-content-between align-items-center mb-3 p-3 rounded" 
+                             style="background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.1));">
+                            <div>
+                                <h6 class="mb-1 fw-bold">
+                                    <i class="bi bi-person-circle me-2"></i>${nom}
+                                </h6>
+                                <small class="text-muted">
+                                    <i class="bi bi-credit-card me-1"></i>${info.carte_masquee}
+                                </small>
+                            </div>
+                            <div class="text-end">
+                                <div class="text-muted small">Solde</div>
+                                <h4 class="mb-0 fw-bold text-primary">${info.solde}€</h4>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += compteHtml;
+                }
+            });
+    }
+
+    function loadSecurityLogs() {
+        fetch('/api/security_logs')
+            .then(response => response.json())
+            .then(logs => {
+                const tbody = document.getElementById('security-logs-tbody');
+                const noLogs = document.getElementById('no-security-logs');
+                
+                if (logs.length === 0) {
+                    tbody.innerHTML = '';
+                    noLogs.style.display = 'block';
+                    return;
+                }
+                
+                noLogs.style.display = 'none';
+                tbody.innerHTML = '';
+                
+                const attackTypeNames = {
+                    'rejeu': 'Attaque par Rejeu',
+                    'modification_montant': 'Modification de Montant',
+                    'usurpation': 'Usurpation d\'Identité',
+                    'certificat_revoque': 'Certificat Révoqué',
+                    'timestamp_expire': 'Timestamp Expiré',
+                    'fonds_insuffisants': 'Fonds Insuffisants',
+                    'carte_invalide': 'Carte Invalide',
+                    'injection': 'Injection de Code'
+                };
+                
+                logs.slice().reverse().forEach(log => {
+                    const tr = document.createElement('tr');
+                    
+                    const severityBadge = log.severity === 'critical' ? 
+                        '<span class="badge bg-danger">Critique</span>' :
+                        log.severity === 'high' ?
+                        '<span class="badge bg-warning">Élevé</span>' :
+                        '<span class="badge bg-info">Moyen</span>';
+                    
+                    const statusBadge = log.blocked ?
+                        '<span class="badge bg-success"><i class="bi bi-shield-check"></i> Bloquée</span>' :
+                        '<span class="badge bg-warning"><i class="bi bi-exclamation-triangle"></i> Non Bloquée</span>';
+                    
+                    tr.innerHTML = `
+                        <td class="small">${new Date(log.timestamp).toLocaleString('fr-FR')}</td>
+                        <td><strong>${attackTypeNames[log.attack_type] || log.attack_type}</strong></td>
+                        <td class="small">${log.message}</td>
+                        <td>${statusBadge}</td>
+                        <td>${severityBadge}</td>
+                    `;
+                    
+                    tbody.appendChild(tr);
+                });
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadBanqueData();
+        loadSecurityLogs();
+    });
+
+    socket.on('nouveau_log', function(log) {
+        if (log.type === 'transaction') {
+            loadBanqueData();
+        }
+        if (log.type === 'security') {
+            loadSecurityLogs();
+        }
+    });
+    
+    socket.on('security_alert', function(alert) {
+        loadSecurityLogs();
+        showToast('🚨 Tentative d\'attaque détectée : ' + alert.message, 'danger');
+    });
+</script>
+{% endblock %}

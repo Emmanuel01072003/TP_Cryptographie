@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}Accueil - Protocole SET/CDA{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-lg-10">
+        <div class="text-center mb-5">
+            <h1 class="display-3 fw-bold text-white mb-4" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+                <i class="bi bi-shield-lock-fill"></i>
+                Simulation Protocole SET/CDA
+            </h1>
+            <p class="lead text-white fs-4" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">
+                Secure Electronic Transaction avec Combined DDA / Application Cryptogram Generation
+            </p>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="card h-100 text-center">
+                    <div class="card-body p-4">
+                        <div class="stat-icon mx-auto" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                            <i class="bi bi-shield-check text-white"></i>
+                        </div>
+                        <h3 class="fw-bold mb-3">Sécurité Renforcée</h3>
+                        <p class="text-muted">
+                            Chiffrement RSA 2048 bits, signatures numériques, et certificats X.509 
+                            pour une sécurité maximale des transactions.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-100 text-center">
+                    <div class="card-body p-4">
+                        <div class="stat-icon mx-auto" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                            <i class="bi bi-people-fill text-white"></i>
+                        </div>
+                        <h3 class="fw-bold mb-3">Multi-Entités</h3>
+                        <p class="text-muted">
+                            Gestion complète des clients, marchands, banque et autorité 
+                            de certification dans un système distribué.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-100 text-center">
+                    <div class="card-body p-4">
+                        <div class="stat-icon mx-auto" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                            <i class="bi bi-graph-up-arrow text-white"></i>
+                        </div>
+                        <h3 class="fw-bold mb-3">Temps Réel</h3>
+                        <p class="text-muted">
+                            Suivi en direct des transactions avec WebSockets, 
+                            visualisations dynamiques et tableaux de bord interactifs.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-info-circle-fill"></i>
+                        À propos du Protocole SET/CDA
+                    </div>
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3">Fonctionnalités Implémentées</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                <strong>Autorité de Certification (CA)</strong> - Émission et révocation de certificats
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                <strong>Certificats X.509</strong> - Gestion complète du cycle de vie
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                <strong>Double Signature</strong> - Order Info + Payment Info chiffré
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                <strong>Chiffrement Asymétrique</strong> - RSA 2048 bits avec PKCS1_OAEP
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                <strong>ARQC</strong> - Application Request Cryptogram Generation
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                <strong>Protection Anti-Rejeu</strong> - Nonces et timestamps
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-diagram-3-fill"></i>
+                        Architecture du Système
+                    </div>
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3">Entités du Système</h5>
+                        <div class="mb-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="rounded-circle bg-primary text-white p-2 me-3">
+                                    <i class="bi bi-award-fill"></i>
+                                </div>
+                                <div>
+                                    <strong>Autorité de Certification</strong>
+                                    <p class="mb-0 text-muted small">Gère les certificats et la chaîne de confiance</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="rounded-circle bg-success text-white p-2 me-3">
+                                    <i class="bi bi-person-fill"></i>
+                                </div>
+                                <div>
+                                    <strong>Client</strong>
+                                    <p class="mb-0 text-muted small">Effectue des achats sécurisés avec double signature</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="rounded-circle bg-warning text-white p-2 me-3">
+                                    <i class="bi bi-shop"></i>
+                                </div>
+                                <div>
+                                    <strong>Marchand</strong>
+                                    <p class="mb-0 text-muted small">Traite les commandes sans voir les infos bancaires</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="rounded-circle bg-danger text-white p-2 me-3">
+                                    <i class="bi bi-bank"></i>
+                                </div>
+                                <div>
+                                    <strong>Banque</strong>
+                                    <p class="mb-0 text-muted small">Autorise les paiements et génère les ARQC</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-rocket-takeoff-fill"></i>
+                        Démarrage Rapide
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-3">
+                                <a href="/dashboard" class="btn btn-lg btn-primary w-100 mb-3">
+                                    <i class="bi bi-speedometer2 me-2"></i>
+                                    Dashboard
+                                </a>
+                                <p class="text-muted small">Statistiques et vue d'ensemble</p>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="/client" class="btn btn-lg btn-success w-100 mb-3">
+                                    <i class="bi bi-cart-fill me-2"></i>
+                                    Acheter
+                                </a>
+                                <p class="text-muted small">Effectuer une transaction sécurisée</p>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="/marchand" class="btn btn-lg btn-warning w-100 mb-3">
+                                    <i class="bi bi-box-seam me-2"></i>
+                                    Commandes
+                                </a>
+                                <p class="text-muted small">Gérer les commandes reçues</p>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="/certificats" class="btn btn-lg btn-info w-100 mb-3">
+                                    <i class="bi bi-patch-check-fill me-2"></i>
+                                    Certificats
+                                </a>
+                                <p class="text-muted small">Consulter et gérer les certificats</p>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="/attaques" class="btn btn-lg btn-danger w-100 mb-3">
+                                    <i class="bi bi-shield-x me-2"></i>
+                                    Tests Sécurité
+                                </a>
+                                <p class="text-muted small">Tester les attaques et défenses</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4 mb-5">
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <h5 class="alert-heading">
+                        <i class="bi bi-lightbulb-fill me-2"></i>
+                        Analyse de Sécurité
+                    </h5>
+                    <hr>
+                    <p class="mb-2"><strong>Points forts :</strong></p>
+                    <ul>
+                        <li>Chiffrement asymétrique RSA 2048 bits</li>
+                        <li>Double signature pour intégrité et non-répudiation</li>
+                        <li>Séparation des informations (marchand ne voit pas les données bancaires)</li>
+                        <li>Protection contre les attaques par rejeu avec nonces et timestamps</li>
+                        <li>Gestion de certificats avec révocation</li>
+                    </ul>
+                    <p class="mb-2 mt-3"><strong>Améliorations possibles :</strong></p>
+                    <ul class="mb-0">
+                        <li>Ajout de CRL (Certificate Revocation List) distribuée</li>
+                        <li>Implémentation d'OCSP (Online Certificate Status Protocol)</li>
+                        <li>Support de la cryptographie à courbes elliptiques (ECC)</li>
+                        <li>Audit trail cryptographiquement sécurisé</li>
+                        <li>Support du 3D Secure pour transactions en ligne</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

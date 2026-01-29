@@ -1,0 +1,844 @@
+{% extends "base.html" %}
+
+{% block title %}Tests de Sécurité - Protocole SET/CDA{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-5 fw-bold text-white mb-3" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+            <i class="bi bi-shield-x"></i> Tests de Sécurité Interactifs
+        </h1>
+        <p class="text-white lead" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">
+            Testez manuellement les différentes attaques contre le protocole SET/CDA
+        </p>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-header bg-danger text-white">
+                <i class="bi bi-bug-fill me-2"></i>
+                Choisissez un Type d'Attaque
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <!-- Attaque par Rejeu -->
+                    <div class="col-md-6">
+                        <div class="card h-100 border-danger attaque-card" data-type="rejeu" style="cursor: pointer;">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="bi bi-arrow-repeat text-danger"></i>
+                                    Attaque par Rejeu
+                                </h5>
+                                <p class="card-text small text-muted">
+                                    Rejouer une transaction déjà effectuée
+                                </p>
+                                <span class="badge bg-danger">Niveau: Moyen</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modification de Montant -->
+                    <div class="col-md-6">
+                        <div class="card h-100 border-warning attaque-card" data-type="modification_montant" style="cursor: pointer;">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="bi bi-currency-exchange text-warning"></i>
+                                    Modification de Montant
+                                </h5>
+                                <p class="card-text small text-muted">
+                                    Modifier le montant après signature
+                                </p>
+                                <span class="badge bg-warning">Niveau: Élevé</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Usurpation d'Identité -->
+                    <div class="col-md-6">
+                        <div class="card h-100 border-danger attaque-card" data-type="usurpation" style="cursor: pointer;">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="bi bi-person-x text-danger"></i>
+                                    Usurpation d'Identité
+                                </h5>
+                                <p class="card-text small text-muted">
+                                    Se faire passer pour un autre client
+                                </p>
+                                <span class="badge bg-danger">Niveau: Critique</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Certificat Révoqué -->
+                    <div class="col-md-6">
+                        <div class="card h-100 border-warning attaque-card" data-type="certificat_revoque" style="cursor: pointer;">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="bi bi-file-earmark-x text-warning"></i>
+                                    Certificat Révoqué
+                                </h5>
+                                <p class="card-text small text-muted">
+                                    Utiliser un certificat révoqué
+                                </p>
+                                <span class="badge bg-warning">Niveau: Élevé</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timestamp Expiré -->
+                    <div class="col-md-6">
+                        <div class="card h-100 border-info attaque-card" data-type="timestamp_expire" style="cursor: pointer;">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="bi bi-clock-history text-info"></i>
+                                    Timestamp Expiré
+                                </h5>
+                                <p class="card-text small text-muted">
+                                    Rejouer une vieille transaction
+                                </p>
+                                <span class="badge bg-info">Niveau: Faible</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fonds Insuffisants -->
+                    <div class="col-md-6">
+                        <div class="card h-100 border-info attaque-card" data-type="fonds_insuffisants" style="cursor: pointer;">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="bi bi-wallet2 text-info"></i>
+                                    Fonds Insuffisants
+                                </h5>
+                                <p class="card-text small text-muted">
+                                    Acheter sans argent suffisant
+                                </p>
+                                <span class="badge bg-info">Niveau: Faible</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Carte Invalide -->
+                    <div class="col-md-6">
+                        <div class="card h-100 border-secondary attaque-card" data-type="carte_invalide" style="cursor: pointer;">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="bi bi-credit-card-2-back text-secondary"></i>
+                                    Carte Invalide
+                                </h5>
+                                <p class="card-text small text-muted">
+                                    Utiliser une carte inexistante
+                                </p>
+                                <span class="badge bg-secondary">Niveau: Faible</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Injection de Code -->
+                    <div class="col-md-6">
+                        <div class="card h-100 border-danger attaque-card" data-type="injection" style="cursor: pointer;">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="bi bi-code-slash text-danger"></i>
+                                    Injection de Code
+                                </h5>
+                                <p class="card-text small text-muted">
+                                    Injecter du code malveillant
+                                </p>
+                                <span class="badge bg-danger">Niveau: Critique</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulaire de Test -->
+        <div class="card" id="test-form-card" style="display: none;">
+            <div class="card-header bg-primary text-white">
+                <i class="bi bi-gear-fill me-2"></i>
+                Paramètres de l'Attaque: <span id="attack-title"></span>
+            </div>
+            <div class="card-body">
+                <form id="test-form">
+                    <div id="form-fields"></div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger flex-grow-1" id="test-btn">
+                            <i class="bi bi-play-fill me-2"></i>
+                            Lancer l'Attaque
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="cancel-btn">
+                            <i class="bi bi-x-circle me-2"></i>
+                            Annuler
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                Description de l'Attaque
+            </div>
+            <div class="card-body" id="attack-description">
+                <p class="text-muted text-center py-5">
+                    <i class="bi bi-arrow-left-circle display-4"></i>
+                    <br><br>
+                    Sélectionnez une attaque pour voir sa description
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Résultat du Test en Pleine Largeur -->
+<div class="row" id="result-row" style="display: none;">
+    <div class="col-12">
+        <div class="card" id="result-card">
+            <div class="card-header text-white" id="result-header">
+                <i class="bi bi-flag-fill me-2"></i>
+                Résultat du Test
+            </div>
+            <div class="card-body" id="result-body">
+                <!-- Résultat dynamique -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.attaque-card {
+    transition: all 0.3s ease;
+}
+
+.attaque-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.attaque-card.selected {
+    border-width: 3px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+}
+
+.pulse-animation {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+</style>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const attackDescriptions = {
+    'rejeu': {
+        title: 'Attaque par Rejeu',
+        description: `
+            <h6 class="fw-bold">Objectif de l'Attaque</h6>
+            <p>Un attaquant intercepte une transaction valide et essaie de la rejouer pour effectuer un second paiement.</p>
+            
+            <h6 class="fw-bold mt-3">Scénario</h6>
+            <ol class="small">
+                <li>Le client effectue un achat légitime de 10€</li>
+                <li>L'attaquant capture le paquet de transaction</li>
+                <li>L'attaquant renvoie le même paquet pour obtenir un second paiement</li>
+            </ol>
+            
+            <h6 class="fw-bold mt-3">Défense</h6>
+            <p class="small">
+                <i class="bi bi-shield-check text-success"></i>
+                Chaque <code>transaction_id</code> est unique et enregistré. Le système refuse toute transaction avec un ID déjà vu.
+            </p>
+        `,
+        fields: [
+            {name: 'client', type: 'select', label: 'Client', options: {{ clients | tojson }}},
+            {name: 'marchand', type: 'select', label: 'Marchand', options: {{ marchands | tojson }}}
+        ]
+    },
+    'modification_montant': {
+        title: 'Modification de Montant',
+        description: `
+            <h6 class="fw-bold">Objectif de l'Attaque</h6>
+            <p>L'attaquant modifie le montant d'une transaction après que le client l'ait signée.</p>
+            
+            <h6 class="fw-bold mt-3">Scénario</h6>
+            <ol class="small">
+                <li>Le client signe une transaction de 100€</li>
+                <li>L'attaquant intercepte et change le montant à 1€</li>
+                <li>L'attaquant envoie la transaction modifiée au marchand</li>
+            </ol>
+            
+            <h6 class="fw-bold mt-3">Défense</h6>
+            <p class="small">
+                <i class="bi bi-shield-check text-success"></i>
+                La signature cryptographique couvre <code>hash(OI + PI + ID)</code>. Toute modification invalide la signature.
+            </p>
+        `,
+        fields: [
+            {name: 'client', type: 'select', label: 'Client', options: {{ clients | tojson }}},
+            {name: 'marchand', type: 'select', label: 'Marchand', options: {{ marchands | tojson }}},
+            {name: 'montant_original', type: 'number', label: 'Montant Original (€)', value: 100},
+            {name: 'montant_modifie', type: 'number', label: 'Montant Modifié (€)', value: 1}
+        ]
+    },
+    'usurpation': {
+        title: 'Usurpation d\'Identité',
+        description: `
+            <h6 class="fw-bold">Objectif de l'Attaque</h6>
+            <p>L'attaquant crée un faux certificat pour se faire passer pour un client légitime.</p>
+            
+            <h6 class="fw-bold mt-3">Scénario</h6>
+            <ol class="small">
+                <li>L'attaquant génère sa propre paire de clés RSA</li>
+                <li>Il crée un certificat prétendant être "Alice"</li>
+                <li>Il signe le certificat avec sa propre clé (auto-signé)</li>
+                <li>Il essaie d'effectuer un achat</li>
+            </ol>
+            
+            <h6 class="fw-bold mt-3">Défense</h6>
+            <p class="small">
+                <i class="bi bi-shield-check text-success"></i>
+                Le marchand vérifie que le certificat est signé par la <strong>CA légitime</strong>. Un certificat auto-signé est refusé.
+            </p>
+        `,
+        fields: [
+            {name: 'client_cible', type: 'select', label: 'Client à Usurper', options: {{ clients | tojson }}},
+            {name: 'marchand', type: 'select', label: 'Marchand', options: {{ marchands | tojson }}}
+        ]
+    },
+    'certificat_revoque': {
+        title: 'Certificat Révoqué',
+        description: `
+            <h6 class="fw-bold">Objectif de l'Attaque</h6>
+            <p>Un client malveillant dont le certificat a été révoqué essaie quand même d'effectuer un achat.</p>
+            
+            <h6 class="fw-bold mt-3">Scénario</h6>
+            <ol class="small">
+                <li>Un client "Attaquant" est créé avec un certificat valide</li>
+                <li>La CA révoque son certificat (activité suspecte)</li>
+                <li>L'attaquant essaie d'acheter avec le certificat révoqué</li>
+            </ol>
+            
+            <h6 class="fw-bold mt-3">Défense</h6>
+            <p class="small">
+                <i class="bi bi-shield-check text-success"></i>
+                Le marchand vérifie la <strong>CRL (Certificate Revocation List)</strong>. Tout certificat révoqué est refusé.
+            </p>
+        `,
+        fields: [
+            {name: 'marchand', type: 'select', label: 'Marchand', options: {{ marchands | tojson }}}
+        ]
+    },
+    'timestamp_expire': {
+        title: 'Timestamp Expiré',
+        description: `
+            <h6 class="fw-bold">Objectif de l'Attaque</h6>
+            <p>Rejouer une vieille transaction capturée il y a longtemps.</p>
+            
+            <h6 class="fw-bold mt-3">Scénario</h6>
+            <ol class="small">
+                <li>L'attaquant capture une transaction valide</li>
+                <li>Il attend plusieurs heures/jours</li>
+                <li>Il essaie de rejouer la transaction</li>
+            </ol>
+            
+            <h6 class="fw-bold mt-3">Défense</h6>
+            <p class="small">
+                <i class="bi bi-shield-check text-success"></i>
+                Fenêtre temporelle de <strong>5 minutes</strong>. Les transactions trop anciennes ou trop futures sont refusées.
+            </p>
+        `,
+        fields: [
+            {name: 'client', type: 'select', label: 'Client', options: {{ clients | tojson }}},
+            {name: 'marchand', type: 'select', label: 'Marchand', options: {{ marchands | tojson }}},
+            {name: 'minutes', type: 'number', label: 'Âge de la Transaction (minutes)', value: 60}
+        ]
+    },
+    'fonds_insuffisants': {
+        title: 'Fonds Insuffisants',
+        description: `
+            <h6 class="fw-bold">Objectif de l'Attaque</h6>
+            <p>Essayer d'acheter quelque chose qui coûte plus que le solde disponible.</p>
+            
+            <h6 class="fw-bold mt-3">Scénario</h6>
+            <ol class="small">
+                <li>Un client a seulement 50€ de solde</li>
+                <li>Il essaie d'acheter pour 1000€</li>
+            </ol>
+            
+            <h6 class="fw-bold mt-3">Défense</h6>
+            <p class="small">
+                <i class="bi bi-shield-check text-success"></i>
+                La banque vérifie le solde avant d'autoriser. Si <code>solde < montant</code>, la transaction est refusée.
+            </p>
+        `,
+        fields: [
+            {name: 'marchand', type: 'select', label: 'Marchand', options: {{ marchands | tojson }}},
+            {name: 'solde', type: 'number', label: 'Solde Disponible (€)', value: 50},
+            {name: 'montant', type: 'number', label: 'Montant à Acheter (€)', value: 1000}
+        ]
+    },
+    'carte_invalide': {
+        title: 'Carte Invalide',
+        description: `
+            <h6 class="fw-bold">Objectif de l'Attaque</h6>
+            <p>Utiliser un numéro de carte bancaire qui n'existe pas dans le système.</p>
+            
+            <h6 class="fw-bold mt-3">Scénario</h6>
+            <ol class="small">
+                <li>L'attaquant utilise une carte 4970-9999-9999-9999</li>
+                <li>Cette carte n'est pas enregistrée dans la banque</li>
+            </ol>
+            
+            <h6 class="fw-bold mt-3">Défense</h6>
+            <p class="small">
+                <i class="bi bi-shield-check text-success"></i>
+                La banque vérifie que la carte existe dans sa base de données. Sinon, refus immédiat.
+            </p>
+        `,
+        fields: [
+            {name: 'marchand', type: 'select', label: 'Marchand', options: {{ marchands | tojson }}}
+        ]
+    },
+    'injection': {
+        title: 'Injection de Code',
+        description: `
+            <h6 class="fw-bold">Objectif de l'Attaque</h6>
+            <p>Injecter du code malveillant (SQL, XSS, etc.) dans les champs de transaction.</p>
+            
+            <h6 class="fw-bold mt-3">Scénario</h6>
+            <ol class="small">
+                <li>L'attaquant envoie <code>'; DROP TABLE users; --</code></li>
+                <li>Ou <code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code></li>
+                <li>Espérant que le code sera exécuté</li>
+            </ol>
+            
+            <h6 class="fw-bold mt-3">Défense</h6>
+            <p class="small">
+                <i class="bi bi-shield-check text-success"></i>
+                Les données sont signées et traitées comme <strong>texte brut</strong>, jamais interprétées comme du code.
+            </p>
+        `,
+        fields: [
+            {name: 'client', type: 'select', label: 'Client', options: {{ clients | tojson }}},
+            {name: 'marchand', type: 'select', label: 'Marchand', options: {{ marchands | tojson }}}
+        ]
+    }
+};
+
+let currentAttackType = null;
+
+// Sélection d'une attaque
+document.querySelectorAll('.attaque-card').forEach(card => {
+    card.addEventListener('click', function() {
+        const type = this.dataset.type;
+        selectAttack(type);
+    });
+});
+
+function selectAttack(type) {
+    // Désélectionner toutes les cartes
+    document.querySelectorAll('.attaque-card').forEach(c => c.classList.remove('selected'));
+    
+    // Sélectionner la carte cliquée
+    document.querySelector(`[data-type="${type}"]`).classList.add('selected');
+    
+    currentAttackType = type;
+    const attack = attackDescriptions[type];
+    
+    // Afficher la description
+    document.getElementById('attack-description').innerHTML = attack.description;
+    
+    // Afficher le formulaire
+    document.getElementById('attack-title').textContent = attack.title;
+    document.getElementById('test-form-card').style.display = 'block';
+    
+    // Générer les champs du formulaire
+    const formFields = document.getElementById('form-fields');
+    formFields.innerHTML = '';
+    
+    attack.fields.forEach(field => {
+        const div = document.createElement('div');
+        div.className = 'mb-3';
+        
+        if (field.type === 'select') {
+            div.innerHTML = `
+                <label class="form-label fw-bold">${field.label}</label>
+                <select class="form-select" name="${field.name}" required>
+                    ${field.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                </select>
+            `;
+        } else if (field.type === 'number') {
+            div.innerHTML = `
+                <label class="form-label fw-bold">${field.label}</label>
+                <input type="number" class="form-control" name="${field.name}" value="${field.value || ''}" step="0.01" required>
+            `;
+        } else {
+            div.innerHTML = `
+                <label class="form-label fw-bold">${field.label}</label>
+                <input type="text" class="form-control" name="${field.name}" value="${field.value || ''}" required>
+            `;
+        }
+        
+        formFields.appendChild(div);
+    });
+    
+    // Cacher le résultat précédent
+    document.getElementById('result-row').style.display = 'none';
+    
+    // Scroll vers le formulaire
+    document.getElementById('test-form-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Annulation
+document.getElementById('cancel-btn').addEventListener('click', function() {
+    document.getElementById('test-form-card').style.display = 'none';
+    document.querySelectorAll('.attaque-card').forEach(c => c.classList.remove('selected'));
+    document.getElementById('attack-description').innerHTML = `
+        <p class="text-muted text-center py-5">
+            <i class="bi bi-arrow-left-circle display-4"></i>
+            <br><br>
+            Sélectionnez une attaque pour voir sa description
+        </p>
+    `;
+    currentAttackType = null;
+});
+
+// Soumission du test
+document.getElementById('test-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const testBtn = document.getElementById('test-btn');
+    testBtn.disabled = true;
+    testBtn.innerHTML = '<span class="loading me-2"></span> Test en cours...';
+    
+    // Récupérer les paramètres
+    const formData = new FormData(this);
+    const params = {};
+    formData.forEach((value, key) => {
+        params[key] = value;
+    });
+    
+    // Envoyer la requête
+    fetch('/api/test_attaque', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            type: currentAttackType,
+            params: params
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        displayResult(data);
+    })
+    .catch(error => {
+        showToast('❌ Erreur : ' + error.message, 'danger');
+    })
+    .finally(() => {
+        testBtn.disabled = false;
+        testBtn.innerHTML = '<i class="bi bi-play-fill me-2"></i> Lancer l\'Attaque';
+    });
+});
+
+function displayResult(data) {
+    const resultCard = document.getElementById('result-card');
+    const resultHeader = document.getElementById('result-header');
+    const resultBody = document.getElementById('result-body');
+    
+    if (data.attaque_bloquee) {
+        resultHeader.className = 'card-header bg-success text-white';
+        resultHeader.innerHTML = '<i class="bi bi-shield-check-fill me-2"></i> Attaque Bloquée ✅';
+    } else {
+        resultHeader.className = 'card-header bg-warning text-dark';
+        resultHeader.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-2"></i> Attaque Non Bloquée';
+    }
+    
+    let html = `
+        <div class="alert ${data.attaque_bloquee ? 'alert-success' : 'alert-warning'} mb-3">
+            <strong>${data.attaque_bloquee ? '✅ SÉCURITÉ VALIDÉE' : '⚠️ ATTENTION'}</strong><br>
+            ${data.attaque_bloquee ? 'Le système a détecté et bloqué l\'attaque' : 'L\'attaque n\'a pas été bloquée (normal pour certains cas)'}
+        </div>
+    `;
+    
+    // NOUVEAU : Étapes de vérification détaillées
+    if (data.verification_steps && data.verification_steps.length > 0) {
+        html += `
+            <div class="card mb-3 border-primary">
+                <div class="card-header bg-primary text-white">
+                    <i class="bi bi-list-check"></i> Étapes de Vérification
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+        `;
+        
+        data.verification_steps.forEach(step => {
+            const icon = step.status === 'success' ? 'check-circle text-success' : 
+                        step.status === 'error' ? 'x-circle text-danger' : 'dash-circle text-warning';
+            html += `
+                <div class="list-group-item">
+                    <div class="d-flex align-items-start">
+                        <span class="badge bg-secondary me-2">${step.step}</span>
+                        <div class="flex-grow-1">
+                            <div class="fw-bold"><i class="bi bi-${icon}"></i> ${step.action}</div>
+                            <small class="text-muted">${step.details}</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // NOUVEAU : Comparaison de certificats
+    if (data.technical_details && data.technical_details.vrai_certificat && data.technical_details.faux_certificat) {
+        html += `
+            <div class="card mb-3 border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <i class="bi bi-shield-shaded"></i> Comparaison des Certificats
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-success"><i class="bi bi-shield-check"></i> Certificat Légitime</h6>
+                            <table class="table table-sm small">
+                                <tr><th>Sujet:</th><td>${data.technical_details.vrai_certificat.sujet}</td></tr>
+                                <tr><th>Émetteur:</th><td class="text-success">${data.technical_details.vrai_certificat.emetteur}</td></tr>
+                                <tr><th>N° Série:</th><td><code class="small">${data.technical_details.vrai_certificat.numero_serie.substring(0, 16)}...</code></td></tr>
+                                <tr><th>Clé Publique (n):</th><td><code class="small">${data.technical_details.vrai_certificat.cle_publique_n}</code></td></tr>
+                                <tr><th>Signature CA:</th><td class="text-success"><i class="bi bi-check-circle-fill"></i> Valide</td></tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-danger"><i class="bi bi-shield-x"></i> Certificat Forgé</h6>
+                            <table class="table table-sm small">
+                                <tr><th>Sujet:</th><td>${data.technical_details.faux_certificat.sujet}</td></tr>
+                                <tr><th>Émetteur:</th><td class="text-danger">${data.technical_details.faux_certificat.emetteur}</td></tr>
+                                <tr><th>N° Série:</th><td><code class="small">${data.technical_details.faux_certificat.numero_serie.substring(0, 16)}...</code></td></tr>
+                                <tr><th>Clé Publique (n):</th><td><code class="small">${data.technical_details.faux_certificat.cle_publique_n}</code></td></tr>
+                                <tr><th>Signature CA:</th><td class="text-danger"><i class="bi bi-x-circle-fill"></i> INVALIDE</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="alert alert-danger mt-2 mb-0 small">
+                        <i class="bi bi-exclamation-triangle-fill"></i> <strong>Incompatibilité détectée :</strong> 
+                        Les clés publiques sont différentes et le certificat n'est pas signé par la CA légitime !
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // NOUVEAU : Détails cryptographiques
+    if (data.technical_details) {
+        html += `
+            <div class="card mb-3 border-info">
+                <div class="card-header bg-info text-white">
+                    <i class="bi bi-key-fill"></i> Détails Cryptographiques
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm small mb-0">
+        `;
+        
+        if (data.technical_details.transaction_id) {
+            html += `<tr><th>Transaction ID:</th><td><code>${data.technical_details.transaction_id.substring(0, 24)}...</code></td></tr>`;
+        }
+        
+        // Comparaison de hash si disponible
+        if (data.technical_details.hash_original && data.technical_details.hash_modifie) {
+            html += `
+                <tr>
+                    <th>Hash Original (SHA-256):</th>
+                    <td><code class="small text-success">${data.technical_details.hash_original}</code></td>
+                </tr>
+                <tr>
+                    <th>Hash Modifié:</th>
+                    <td><code class="small text-danger">${data.technical_details.hash_modifie}</code></td>
+                </tr>
+                <tr>
+                    <th>Comparaison:</th>
+                    <td>
+                        ${data.technical_details.hash_different ? 
+                            '<span class="badge bg-danger">❌ DIFFÉRENTS - Signature invalide</span>' : 
+                            '<span class="badge bg-success">✅ Identiques</span>'
+                        }
+                    </td>
+                </tr>
+            `;
+        } else if (data.technical_details.hash_donnees) {
+            html += `<tr><th>Hash SHA-256:</th><td><code class="small">${data.technical_details.hash_donnees.substring(0, 32)}...</code></td></tr>`;
+        }
+        
+        if (data.technical_details.pi_chiffre_taille) {
+            html += `<tr><th>Données chiffrées:</th><td>${data.technical_details.pi_chiffre_taille} octets (RSA 2048 bits)</td></tr>`;
+        }
+        if (data.technical_details.signature_taille) {
+            html += `<tr><th>Signature:</th><td>${data.technical_details.signature_taille} octets</td></tr>`;
+        }
+        
+        html += `
+                    </table>
+                </div>
+            </div>
+        `;
+    }
+    
+    // NOUVEAU : Paquet reçu par le marchand
+    if (data.paquet_recu) {
+        html += `
+            <div class="card mb-3 border-secondary">
+                <div class="card-header bg-secondary text-white">
+                    <i class="bi bi-inbox-fill"></i> Paquet Reçu par le Marchand
+                </div>
+                <div class="card-body">
+                    <pre class="bg-dark text-light p-3 rounded small mb-0">${JSON.stringify(data.paquet_recu, null, 2)}</pre>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Afficher les détails spécifiques (code existant)
+    if (data.premier_envoi) {
+        html += `
+            <h6 class="fw-bold">Premier Envoi (Légitime)</h6>
+            <p class="small">
+                <i class="bi bi-${data.premier_envoi.succes ? 'check-circle text-success' : 'x-circle text-danger'}"></i>
+                ${data.premier_envoi.message}
+            </p>
+            
+            <h6 class="fw-bold mt-3">Deuxième Envoi (Rejeu)</h6>
+            <p class="small">
+                <i class="bi bi-${data.deuxieme_envoi.succes ? 'check-circle text-success' : 'x-circle text-danger'}"></i>
+                ${data.deuxieme_envoi.message}
+            </p>
+        `;
+    } else if (data.resultat && !data.verification_steps) {
+        html += `
+            <h6 class="fw-bold">Résultat</h6>
+            <p class="small">
+                <i class="bi bi-${data.resultat.succes ? 'check-circle text-success' : 'x-circle text-danger'}"></i>
+                ${data.resultat.message}
+            </p>
+        `;
+    }
+    
+    // Afficher les infos supplémentaires
+    if (data.montant_original) {
+        html += `
+            <div class="row mt-3">
+                <div class="col-6">
+                    <small class="text-muted">Montant Original</small>
+                    <p class="fw-bold">${data.montant_original}€</p>
+                </div>
+                <div class="col-6">
+                    <small class="text-muted">Montant Modifié</small>
+                    <p class="fw-bold text-danger">${data.montant_modifie}€</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    if (data.solde_disponible !== undefined) {
+        html += `
+            <div class="row mt-3">
+                <div class="col-6">
+                    <small class="text-muted">Solde Disponible</small>
+                    <p class="fw-bold">${data.solde_disponible}€</p>
+                </div>
+                <div class="col-6">
+                    <small class="text-muted">Montant Demandé</small>
+                    <p class="fw-bold text-danger">${data.montant_demande}€</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    if (data.timestamp_age_minutes) {
+        html += `
+            <p class="small mt-3">
+                <i class="bi bi-clock"></i>
+                <strong>Âge de la transaction:</strong> ${data.timestamp_age_minutes} minutes
+                <span class="text-muted">(limite: 5 minutes)</span>
+            </p>
+        `;
+    }
+    
+    if (data.certificat_numero) {
+        html += `
+            <p class="small mt-3">
+                <i class="bi bi-file-earmark-x"></i>
+                <strong>Certificat révoqué:</strong> <code>${data.certificat_numero}</code>
+            </p>
+        `;
+    }
+    
+    if (data.client_cible && !data.technical_details) {
+        html += `
+            <p class="small mt-3">
+                <i class="bi bi-person-x"></i>
+                <strong>Client usurpé:</strong> ${data.client_cible}
+            </p>
+        `;
+    }
+    
+    if (data.carte) {
+        html += `
+            <p class="small mt-3">
+                <i class="bi bi-credit-card"></i>
+                <strong>Carte invalide:</strong> ${data.carte}
+            </p>
+        `;
+    }
+    
+    if (data.donnees_malveillantes) {
+        html += `
+            <div class="mt-3">
+                <small class="text-muted">Données Malveillantes Injectées</small>
+                <pre class="bg-dark text-warning p-2 rounded small">${JSON.stringify(data.donnees_malveillantes, null, 2)}</pre>
+            </div>
+        `;
+    }
+    
+    // Explication de la défense
+    html += `
+        <div class="border-top pt-3 mt-3">
+            <h6 class="fw-bold">
+                <i class="bi bi-shield-lock-fill text-primary"></i>
+                Mécanisme de Défense
+            </h6>
+            <p class="small">${data.defense}</p>
+            
+            <h6 class="fw-bold mt-3">
+                <i class="bi bi-info-circle-fill text-info"></i>
+                Explication
+            </h6>
+            <p class="small text-muted">${data.explication}</p>
+        </div>
+    `;
+    
+    resultBody.innerHTML = html;
+    document.getElementById('result-row').style.display = 'block';
+    resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    
+    showToast(data.attaque_bloquee ? '✅ Attaque bloquée avec succès !' : '⚠️ Test terminé', data.attaque_bloquee ? 'success' : 'warning');
+}
+</script>
+{% endblock %}

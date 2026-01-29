@@ -1,0 +1,522 @@
+{% extends "base.html" %}
+
+{% block title %}Moniteur de Processus Techniques - SET/CDA{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-5 fw-bold text-white mb-3" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+            <i class="bi bi-cpu"></i> Moniteur de Processus Techniques
+        </h1>
+        <p class="text-white lead" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">
+            Visualisation en temps réel de TOUS les détails cryptographiques et processus internes
+        </p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-dark">
+                <i class="bi bi-exclamation-triangle-fill"></i> Mode Développeur Activé
+            </div>
+            <div class="card-body">
+                <p class="mb-2"><strong>Cet onglet affiche TOUS les détails techniques sensibles :</strong></p>
+                <ul class="mb-0">
+                    <li>🔑 Clés privées et publiques complètes</li>
+                    <li>🔒 Données avant/après chiffrement</li>
+                    <li>✍️ Signatures numériques (hex/base64)</li>
+                    <li>📜 Certificats complets avec toutes les métadonnées</li>
+                    <li>🔐 Hash SHA-256 de toutes les opérations</li>
+                    <li>📊 Processus étape par étape avec timing</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-activity"></i> Journal des Processus Techniques</span>
+                <div>
+                    <button class="btn btn-sm btn-light" id="clear-log-btn">
+                        <i class="bi bi-trash"></i> Effacer
+                    </button>
+                    <button class="btn btn-sm btn-light" id="pause-log-btn">
+                        <i class="bi bi-pause-fill"></i> Pause
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0" style="max-height: 80vh; overflow-y: auto; background: #1e1e1e;">
+                <div id="process-log" class="p-3">
+                    <div class="text-center text-muted py-5">
+                        <i class="bi bi-hourglass-split display-1"></i>
+                        <p class="mt-3">En attente d'opérations...</p>
+                        <p class="small">Effectuez une action (achat, création de client, test d'attaque) pour voir les détails techniques</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtres -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <i class="bi bi-funnel"></i> Filtres d'Affichage
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="filter-keys" checked>
+                            <label class="form-check-label" for="filter-keys">🔑 Clés Cryptographiques</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="filter-encryption" checked>
+                            <label class="form-check-label" for="filter-encryption">🔒 Chiffrement/Déchiffrement</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="filter-signatures" checked>
+                            <label class="form-check-label" for="filter-signatures">✍️ Signatures Numériques</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="filter-certificates" checked>
+                            <label class="form-check-label" for="filter-certificates">📜 Certificats</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.process-entry {
+    border-left: 4px solid #007bff;
+    background: #2d2d2d;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    padding: 15px;
+    color: #e0e0e0;
+    font-family: 'Monaco', 'Courier New', monospace;
+    font-size: 0.85rem;
+}
+
+.process-entry.success {
+    border-left-color: #28a745;
+}
+
+.process-entry.error {
+    border-left-color: #dc3545;
+}
+
+.process-entry.warning {
+    border-left-color: #ffc107;
+}
+
+.process-header {
+    font-weight: bold;
+    font-size: 1rem;
+    margin-bottom: 10px;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.process-timestamp {
+    font-size: 0.75rem;
+    color: #999;
+}
+
+.process-step {
+    margin: 10px 0;
+    padding: 10px;
+    background: #1a1a1a;
+    border-radius: 3px;
+    border-left: 2px solid #555;
+}
+
+.process-step.active {
+    border-left-color: #ffc107;
+}
+
+.process-step.completed {
+    border-left-color: #28a745;
+}
+
+.crypto-data {
+    background: #000;
+    color: #0f0;
+    padding: 8px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    overflow-x: auto;
+    word-break: break-all;
+    margin: 5px 0;
+}
+
+.key-display {
+    background: #1a0033;
+    color: #cc99ff;
+    padding: 8px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    overflow-x: auto;
+    margin: 5px 0;
+}
+
+.step-badge {
+    display: inline-block;
+    background: #007bff;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    margin-right: 5px;
+}
+
+.step-badge.success {
+    background: #28a745;
+}
+
+.step-badge.error {
+    background: #dc3545;
+}
+
+.step-badge.warning {
+    background: #ffc107;
+    color: #000;
+}
+
+.collapse-btn {
+    cursor: pointer;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.collapse-btn:hover {
+    text-decoration: underline;
+}
+</style>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const socket = io();
+let isPaused = false;
+let processCounter = 0;
+
+// Connexion au serveur
+socket.on('connect', function() {
+    console.log('Connecté au moniteur technique');
+    showToast('Moniteur technique connecté', 'success');
+});
+
+// Réception des processus techniques
+socket.on('technical_process', function(data) {
+    console.log('📨 Processus technique reçu:', data);
+    if (!isPaused) {
+        console.log('✅ Affichage du processus');
+        displayProcess(data);
+    } else {
+        console.log('⏸️ Moniteur en pause, processus ignoré');
+    }
+});
+
+function displayProcess(process) {
+    console.log('🎨 Début affichage processus:', process.title);
+    console.log('📊 Données du processus:', process);
+    
+    processCounter++;
+    const logDiv = document.getElementById('process-log');
+    
+    console.log('📦 État du logDiv AVANT:', {
+        children: logDiv.children.length,
+        innerHTML_length: logDiv.innerHTML.length,
+        hasTextCenter: !!logDiv.querySelector('.text-center')
+    });
+    
+    // Retirer le message "En attente" SEULEMENT si c'est le message initial
+    const waitingMessage = logDiv.querySelector('.text-center');
+    if (waitingMessage && waitingMessage.closest('#process-log') && logDiv.children.length <= 1) {
+        console.log('🗑️ Suppression du message initial "En attente"');
+        logDiv.innerHTML = '';
+    } else if (waitingMessage) {
+        console.log('⚠️ Élément .text-center trouvé mais ce n\'est pas le message initial, on garde le contenu');
+    }
+    
+    const entryDiv = document.createElement('div');
+    entryDiv.className = `process-entry ${process.status || 'info'}`;
+    entryDiv.id = `process-${processCounter}`;
+    
+    console.log('🆕 Création de l\'entrée:', `process-${processCounter}`);
+    
+    let html = `
+        <div class="process-header">
+            <span>
+                <i class="bi bi-${getIconForType(process.type)}"></i>
+                ${process.title}
+            </span>
+            <span class="process-timestamp">${new Date(process.timestamp).toLocaleTimeString('fr-FR')}</span>
+        </div>
+    `;
+    
+    // Étapes du processus
+    if (process.steps && process.steps.length > 0) {
+        html += '<div class="mt-3">';
+        process.steps.forEach((step, index) => {
+            const stepStatus = step.status || 'info';
+            const badge = stepStatus === 'success' ? 'success' : stepStatus === 'error' ? 'error' : stepStatus === 'warning' ? 'warning' : 'info';
+            
+            html += `
+                <div class="process-step ${step.completed ? 'completed' : 'active'}">
+                    <span class="step-badge ${badge}">Étape ${index + 1}</span>
+                    <strong>${step.action}</strong>
+                    ${step.details ? `<div class="small text-muted mt-1">${step.details}</div>` : ''}
+                    ${step.duration ? `<div class="small text-muted">⏱️ ${step.duration}ms</div>` : ''}
+                </div>
+            `;
+        });
+        html += '</div>';
+    }
+    
+    // Données cryptographiques
+    if (process.crypto) {
+        html += '<div class="mt-3">';
+        
+        // Clés
+        if (process.crypto.keys) {
+            html += `
+                <div class="mb-2">
+                    <a class="collapse-btn" data-bs-toggle="collapse" href="#keys-${processCounter}">
+                        🔑 Clés Cryptographiques (cliquez pour afficher)
+                    </a>
+                    <div class="collapse mt-2" id="keys-${processCounter}">
+            `;
+            
+            for (const [keyName, keyValue] of Object.entries(process.crypto.keys)) {
+                html += `
+                    <div class="mt-2">
+                        <strong class="text-info">${keyName}:</strong>
+                        <div class="key-display">${formatKey(keyValue)}</div>
+                    </div>
+                `;
+            }
+            
+            html += '</div></div>';
+        }
+        
+        // Données chiffrées/déchiffrées
+        if (process.crypto.encrypted || process.crypto.decrypted) {
+            html += `
+                <div class="mb-2">
+                    <a class="collapse-btn" data-bs-toggle="collapse" href="#crypto-${processCounter}">
+                        🔒 Données Chiffrées/Déchiffrées (cliquez pour afficher)
+                    </a>
+                    <div class="collapse mt-2" id="crypto-${processCounter}">
+            `;
+            
+            if (process.crypto.plaintext) {
+                html += `
+                    <div class="mt-2">
+                        <strong class="text-warning">Données en clair:</strong>
+                        <div class="crypto-data">${escapeHtml(process.crypto.plaintext)}</div>
+                    </div>
+                `;
+            }
+            
+            if (process.crypto.encrypted) {
+                html += `
+                    <div class="mt-2">
+                        <strong class="text-danger">Données chiffrées (hex):</strong>
+                        <div class="crypto-data">${process.crypto.encrypted}</div>
+                    </div>
+                `;
+            }
+            
+            if (process.crypto.decrypted) {
+                html += `
+                    <div class="mt-2">
+                        <strong class="text-success">Données déchiffrées:</strong>
+                        <div class="crypto-data">${escapeHtml(process.crypto.decrypted)}</div>
+                    </div>
+                `;
+            }
+            
+            html += '</div></div>';
+        }
+        
+        // Signatures
+        if (process.crypto.signature) {
+            html += `
+                <div class="mb-2">
+                    <a class="collapse-btn" data-bs-toggle="collapse" href="#sig-${processCounter}">
+                        ✍️ Signature Numérique (cliquez pour afficher)
+                    </a>
+                    <div class="collapse mt-2" id="sig-${processCounter}">
+                        <strong class="text-primary">Signature SHA-256 + RSA:</strong>
+                        <div class="crypto-data">${process.crypto.signature}</div>
+                        ${process.crypto.signature_valid !== undefined ? `
+                            <div class="mt-2">
+                                <strong>Validation:</strong>
+                                <span class="badge bg-${process.crypto.signature_valid ? 'success' : 'danger'}">
+                                    ${process.crypto.signature_valid ? '✅ VALIDE' : '❌ INVALIDE'}
+                                </span>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Hash
+        if (process.crypto.hash) {
+            html += `
+                <div class="mb-2">
+                    <strong class="text-warning">🔐 Hash SHA-256:</strong>
+                    <div class="crypto-data">${process.crypto.hash}</div>
+                </div>
+            `;
+        }
+        
+        // Certificat
+        if (process.crypto.certificate) {
+            html += `
+                <div class="mb-2">
+                    <a class="collapse-btn" data-bs-toggle="collapse" href="#cert-${processCounter}">
+                        📜 Certificat X.509 (cliquez pour afficher)
+                    </a>
+                    <div class="collapse mt-2" id="cert-${processCounter}">
+                        <pre class="crypto-data">${JSON.stringify(process.crypto.certificate, null, 2)}</pre>
+                    </div>
+                </div>
+            `;
+        }
+        
+        html += '</div>';
+    }
+    
+    // Résultat
+    if (process.result) {
+        const resultClass = process.result.success ? 'text-success' : 'text-danger';
+        html += `
+            <div class="mt-3 pt-3 border-top border-secondary">
+                <strong class="${resultClass}">
+                    ${process.result.success ? '✅' : '❌'} Résultat: ${process.result.message}
+                </strong>
+            </div>
+        `;
+    }
+    
+    entryDiv.innerHTML = html;
+    
+    console.log('📝 HTML généré, taille:', html.length, 'caractères');
+    console.log('📌 Insertion de l\'entrée dans le DOM...');
+    
+    // Insérer en haut de la liste
+    if (logDiv.firstChild) {
+        logDiv.insertBefore(entryDiv, logDiv.firstChild);
+        console.log('✅ Entrée insérée AVANT le premier enfant');
+    } else {
+        logDiv.appendChild(entryDiv);
+        console.log('✅ Entrée ajoutée (logDiv était vide)');
+    }
+    
+    console.log('📦 État du logDiv APRÈS insertion:', {
+        children: logDiv.children.length,
+        firstChild_id: logDiv.firstChild ? logDiv.firstChild.id : 'N/A'
+    });
+    
+    // Limiter à 50 entrées
+    const removedCount = 0;
+    while (logDiv.children.length > 50) {
+        const removed = logDiv.lastChild;
+        logDiv.removeChild(removed);
+        console.log('🗑️ Suppression de l\'entrée la plus ancienne:', removed.id);
+    }
+    
+    if (removedCount > 0) {
+        console.log(`🗑️ ${removedCount} entrée(s) supprimée(s) (limite 50)`);
+    }
+    
+    console.log('✅ displayProcess terminé. Total entrées:', logDiv.children.length);
+}
+
+function getIconForType(type) {
+    const icons = {
+        'key_generation': 'key-fill',
+        'encryption': 'lock-fill',
+        'decryption': 'unlock-fill',
+        'signature': 'pen-fill',
+        'verification': 'check-circle-fill',
+        'certificate': 'patch-check-fill',
+        'transaction': 'arrow-left-right',
+        'attack': 'bug-fill',
+        'error': 'x-circle-fill'
+    };
+    return icons[type] || 'gear-fill';
+}
+
+function formatKey(key) {
+    if (typeof key === 'object') {
+        return JSON.stringify(key, null, 2);
+    }
+    if (key.length > 100) {
+        return key.substring(0, 100) + '...\n(Taille totale: ' + key.length + ' caractères)';
+    }
+    return key;
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Boutons de contrôle
+document.getElementById('clear-log-btn').addEventListener('click', function() {
+    document.getElementById('process-log').innerHTML = `
+        <div class="text-center text-muted py-5">
+            <i class="bi bi-hourglass-split display-1"></i>
+            <p class="mt-3">Journal effacé. En attente d'opérations...</p>
+        </div>
+    `;
+    processCounter = 0;
+    showToast('Journal effacé', 'info');
+});
+
+document.getElementById('pause-log-btn').addEventListener('click', function() {
+    isPaused = !isPaused;
+    const btn = this;
+    if (isPaused) {
+        btn.innerHTML = '<i class="bi bi-play-fill"></i> Reprendre';
+        btn.classList.remove('btn-light');
+        btn.classList.add('btn-warning');
+        showToast('Moniteur en pause', 'warning');
+    } else {
+        btn.innerHTML = '<i class="bi bi-pause-fill"></i> Pause';
+        btn.classList.remove('btn-warning');
+        btn.classList.add('btn-light');
+        showToast('Moniteur actif', 'success');
+    }
+});
+
+// Test de connexion
+console.log('Moniteur technique initialisé');
+</script>
+{% endblock %}

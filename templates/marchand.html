@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Interface Marchand - Protocole SET/CDA{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-5 fw-bold text-white mb-3" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+            <i class="bi bi-shop"></i> Interface Marchand
+        </h1>
+        <p class="text-white lead" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">
+            Gestion des commandes et transactions
+        </p>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-filter-circle"></i>
+                Sélectionner un Marchand
+            </div>
+            <div class="card-body">
+                <select class="form-select form-select-lg" id="marchand-select">
+                    <option value="">Choisissez un marchand...</option>
+                    {% for nom in marchands.keys() %}
+                    <option value="{{ nom }}">{{ nom }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="marchand-content" style="display: none;">
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                    <i class="bi bi-box-seam-fill text-white"></i>
+                </div>
+                <h6 class="text-muted text-uppercase small mb-2">Total Commandes</h6>
+                <h2 class="fw-bold mb-0" id="stat-total-commandes">0</h2>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                    <i class="bi bi-currency-euro text-white"></i>
+                </div>
+                <h6 class="text-muted text-uppercase small mb-2">Chiffre d'Affaires</h6>
+                <h2 class="fw-bold mb-0" id="stat-ca">0€</h2>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+                    <i class="bi bi-graph-up-arrow text-white"></i>
+                </div>
+                <h6 class="text-muted text-uppercase small mb-2">Panier Moyen</h6>
+                <h2 class="fw-bold mb-0" id="stat-panier-moyen">0€</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-list-check"></i>
+                    Liste des Commandes
+                    <span class="badge bg-light text-dark ms-2" id="commandes-badge">0</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID Transaction</th>
+                                    <th>Client</th>
+                                    <th>Articles</th>
+                                    <th>Montant</th>
+                                    <th>Date</th>
+                                    <th>ARQC</th>
+                                    <th>Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody id="commandes-tbody"></tbody>
+                        </table>
+                    </div>
+                    <div id="no-commandes" class="text-center text-muted py-5" style="display: none;">
+                        <i class="bi bi-inbox display-1"></i>
+                        <p class="mt-3">Aucune commande pour le moment</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentMarchand = null;
+
+    function loadCommandes(marchand) {
+        fetch(`/api/commandes/${marchand}`)
+            .then(response => response.json())
+            .then(commandes => {
+                const tbody = document.getElementById('commandes-tbody');
+                const noCommandes = document.getElementById('no-commandes');
+                
+                document.getElementById('commandes-badge').textContent = commandes.length;
+                document.getElementById('stat-total-commandes').textContent = commandes.length;
+                
+                if (commandes.length === 0) {
+                    tbody.innerHTML = '';
+                    noCommandes.style.display = 'block';
+                    document.getElementById('stat-ca').textContent = '0€';
+                    document.getElementById('stat-panier-moyen').textContent = '0€';
+                    return;
+                }
+                
+                noCommandes.style.display = 'none';
+                
+                const ca = commandes.reduce((sum, cmd) => sum + cmd.montant, 0);
+                document.getElementById('stat-ca').textContent = ca.toFixed(2) + '€';
+                document.getElementById('stat-panier-moyen').textContent = (ca / commandes.length).toFixed(2) + '€';
+                
+                tbody.innerHTML = '';
+                commandes.forEach(cmd => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><code class="small">${cmd.id.substring(0, 13)}...</code></td>
+                        <td><strong>${cmd.client}</strong></td>
+                        <td>
+                            <span class="badge bg-light text-dark">${cmd.items.length} article(s)</span>
+                            <br><small class="text-muted">${cmd.items.join(', ')}</small>
+                        </td>
+                        <td><strong class="text-primary">${cmd.montant}€</strong></td>
+                        <td class="small">${new Date(cmd.timestamp).toLocaleString('fr-FR')}</td>
+                        <td><code class="small">${cmd.arqc.substring(0, 16)}...</code></td>
+                        <td><span class="badge bg-success">
+                            <i class="bi bi-check-circle-fill"></i> ${cmd.statut}
+                        </span></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+    }
+
+    document.getElementById('marchand-select').addEventListener('change', function() {
+        currentMarchand = this.value;
+        
+        if (currentMarchand) {
+            document.getElementById('marchand-content').style.display = 'block';
+            loadCommandes(currentMarchand);
+        } else {
+            document.getElementById('marchand-content').style.display = 'none';
+        }
+    });
+
+    socket.on('nouveau_log', function(log) {
+        if (currentMarchand && log.type === 'transaction') {
+            loadCommandes(currentMarchand);
+        }
+    });
+</script>
+{% endblock %}
